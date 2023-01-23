@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  db_mysql:
+    image: mysql:latest
+    env_file:
+      - .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-root}
+      - MYSQL_DATABASE=${DB_NAME}
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+  backend:
+    container_name: erp_backend
+    build: .
+    env_file:
+      - .env
+    environment:
+      # Map the host to the mysql container, avoid using the default
+      # on .env
+      - DB_HOST=db_mysql
+    volumes:
+      - static:/app/static
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db_mysql
+
+
+volumes:
+  .:
+  db:
+  static:
